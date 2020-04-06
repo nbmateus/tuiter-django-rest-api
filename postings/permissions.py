@@ -1,12 +1,14 @@
 from rest_framework.permissions import BasePermission
-from .models import UserProfile
+from accounts.models import UserProfile
+from .models import Post
 
-class IsAbleToSeeFullProfile(BasePermission):
-    message = "This profile is private and its owner doesn't follow you."
+class IsAbleToSeeThePost(BasePermission):
+    message = "This post belongs to a private profile and its owner doesn't follow you."
     def has_permission(self, request, view):
         try:
-            userProfile = UserProfile.objects.get(user__username=view.kwargs.get('username'))
-        except UserProfile.DoesNotExist:
+            post = Post.objects.get(pk=view.kwargs.get('postId'))
+            userProfile = UserProfile.objects.get(user=post.user)
+        except Post.DoesNotExist:
             return True
 
         permission = True

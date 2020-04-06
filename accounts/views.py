@@ -4,6 +4,9 @@ from rest_framework import status
 from .serializers import UserProfileSerializer
 from .models import UserProfile
 from .permissions import IsAbleToSeeFullProfile
+from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.generics import UpdateAPIView
 
 
 @api_view()
@@ -20,7 +23,6 @@ def userProfileView(request, username):
 
     if request.method == 'GET':
         serializer = UserProfileSerializer(userProfile)
-
         return Response(serializer.data)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -28,9 +30,13 @@ def userProfileView(request, username):
 
 @api_view(['GET'])
 @permission_classes([IsAbleToSeeFullProfile])
-def profileFollowersView(request, username):
-    if request.method == 'GET':
+def profileFollowerListView(request, username):
+    try:
         userProfile = UserProfile.objects.get(user__username=username)
+    except UserProfile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
         queryset = UserProfile.objects.filter(user__in=userProfile.followers.all())
         return Response(UserProfileSerializer(queryset, many=True).data)
     
@@ -38,10 +44,63 @@ def profileFollowersView(request, username):
 
 @api_view(['GET'])
 @permission_classes([IsAbleToSeeFullProfile])
-def profileFollowingView(request, username):
-    if request.method == 'GET':
+def profileFollowingListView(request, username):
+    try:
         userProfile = UserProfile.objects.get(user__username=username)
+    except UserProfile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
         queryset = UserProfile.objects.filter(user__in=userProfile.following.all())
         return Response(UserProfileSerializer(queryset, many=True).data)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST','DELETE'])
+@csrf_exempt
+@permission_classes([IsAuthenticated ,IsAbleToSeeFullProfile])
+def doFollowOrUnfollowView(request, username):
+    try:
+        userProfileToBeFollowed = UserProfile.objects.get(user__username=username)
+    except userProfileToBeFollowed.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    followerUserProfile = UserProfile.objects.get(user=request.user)
+
+    if request.method == 'POST' and not request.user in userProfileToBeFollowed.followers.all():
+        userProfileToBeFollowed.followers.add(request.user)
+        followerUserProfile.following.add(userProfileToBeFollowed.user)
+        userProfileToBeFollowed.save()
+        followerUserProfile.save()
+        return Response(status=status.HTTP_200_OK)
+        
+    
+    if request.method == 'DELETE' and request.user in userProfileToBeFollowed.followers.all():
+        userProfileToBeFollowed.followers.remove(request.user)
+        followerUserProfile.following.remove(userProfileToBeFollowed.user)
+        userProfileToBeFollowed.save()
+        followerUserProfile.save()
+        return Response(status=status.HTTP_200_OK)
+    
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT',])
+@permission_classes([IsAuthenticated])
+def updateProfile(request, username):
+    try:
+        userProfile = UserProfile.objects.get(user__username=username)
+    except UserProfile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method=='PUT' and request.user == userProfile.user:
+        serializer = UserProfileSerializer(userProfile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+

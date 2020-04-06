@@ -9,8 +9,8 @@ class PostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(many=False)
     likesCount = serializers.SerializerMethodField()
     sharedCount = serializers.SerializerMethodField()
-    mainPost = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
-    rePost = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+    mainPost = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all(), required=False, allow_null=True, default=None)
+    rePost = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all(), required=False, allow_null=True, default=None)
 
     def get_likesCount(self, obj):
         return obj.likes.count()
