@@ -6,7 +6,9 @@ from .models import UserProfile
 from .permissions import IsAbleToSeeFullProfile
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.generics import UpdateAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
 
 
 @api_view()
@@ -22,7 +24,7 @@ def userProfileView(request, username):
 
 
     if request.method == 'GET':
-        serializer = UserProfileSerializer(userProfile)
+        serializer = UserProfileSerializer(userProfile, context={'request':request})
         return Response(serializer.data)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -37,8 +39,12 @@ def profileFollowerListView(request, username):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        queryset = UserProfile.objects.filter(user__in=userProfile.followers.all())
-        return Response(UserProfileSerializer(queryset, many=True).data)
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        followers = UserProfile.objects.filter(user__in=userProfile.followers.all())
+        result_page = paginator.paginate_queryset(followers, request)
+        serializer = UserProfileSerializer(result_page, many=True, context={'request':request})
+        return paginator.get_paginated_response(serializer.data)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -51,8 +57,12 @@ def profileFollowingListView(request, username):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        queryset = UserProfile.objects.filter(user__in=userProfile.following.all())
-        return Response(UserProfileSerializer(queryset, many=True).data)
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        following = UserProfile.objects.filter(user__in=userProfile.following.all())
+        result_page = paginator.paginate_queryset(following, request)
+        serializer = UserProfileSerializer(result_page, many=True, context={'request':request})
+        return paginator.get_paginated_response(serializer.data)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -62,12 +72,12 @@ def profileFollowingListView(request, username):
 def doFollowOrUnfollowView(request, username):
     try:
         userProfileToBeFollowed = UserProfile.objects.get(user__username=username)
-    except userProfileToBeFollowed.DoesNotExist:
+    except UserProfile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     followerUserProfile = UserProfile.objects.get(user=request.user)
 
-    if request.method == 'POST' and not request.user in userProfileToBeFollowed.followers.all():
+    if request.method == 'POST' and not request.user in userProfileToBeFollowed.followers.all() and request.user != userProfileToBeFollowed.user:
         userProfileToBeFollowed.followers.add(request.user)
         followerUserProfile.following.add(userProfileToBeFollowed.user)
         userProfileToBeFollowed.save()
@@ -93,7 +103,7 @@ def updateProfile(request, username):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method=='PUT' and request.user == userProfile.user:
-        serializer = UserProfileSerializer(userProfile, data=request.data)
+        serializer = UserProfileSerializer(userProfile, data=request.data, context={'request':request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -102,5 +112,23 @@ def updateProfile(request, username):
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+def userProfileListView(request):
+    if request.method == 'GET':
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        userProfileList = UserProfile.objects.all()
+        result_page = paginator.paginate_queryset(userProfileList, request)
+        serializer = UserProfileSerializer(result_page, many=True, context={'request':request})
+        return paginator.get_paginated_response(serializer.data)
+    
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+class UserProfileListView(ListAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter,]
+    search_fields = ['user__username','fullname']
 

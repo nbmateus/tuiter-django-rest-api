@@ -3,7 +3,8 @@ from allauth.account.views import ConfirmEmailView, PasswordResetDoneView
 from rest_auth.views import PasswordResetConfirmView
 from rest_auth.registration.views import VerifyEmailView
 from .views import  (
-    userProfileView, profileFollowerListView, profileFollowingListView, registrationCompleteView, doFollowOrUnfollowView, updateProfile
+    userProfileView, profileFollowerListView, profileFollowingListView, registrationCompleteView,
+     doFollowOrUnfollowView, updateProfile, userProfileListView, UserProfileListView
 )
 
 urlpatterns = [
@@ -17,9 +18,8 @@ urlpatterns = [
     path('profile/<str:username>/', userProfileView, name='profile_detail'),
     path('profile/<str:username>/followers/', profileFollowerListView, name='profile_follower_list'),
     path('profile/<str:username>/following/', profileFollowingListView, name='profile_following_list'),
-    path('profile/<str:username>/follow-or-unfollow/', doFollowOrUnfollowView, name='follow_or_unfollow'),
+    path('profile/<str:username>/follow/', doFollowOrUnfollowView, name='follow_or_unfollow'),
     path('profile/<str:username>/update/', updateProfile, name='profile_update'),
-
-    
+    path('profile-list/', UserProfileListView.as_view(), name='profile_list'),
     
 ]
