@@ -72,7 +72,7 @@ def doLikeOrUnlike(request, postId):
         if request.user in post.likes.all():
             post.likes.remove(request.user)
             userProfile.postsLiked.remove(post)
-            return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
     
@@ -108,7 +108,7 @@ def createPost(request):
                 sharedPost = Post.objects.get(pk=rePostId)
                 sharedPost.shared.add(request.user)
                 sharedPost.save()
-            return Response(serializer.data)
+            return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -129,7 +129,7 @@ def postDetail(request, postId):
     if request.method == 'DELETE':
         if request.user.is_authenticated and request.user == post.user:
             post.delete()
-            return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 

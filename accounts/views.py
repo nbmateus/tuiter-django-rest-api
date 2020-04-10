@@ -13,7 +13,7 @@ from rest_framework.generics import ListAPIView
 
 @api_view()
 def registrationCompleteView(request):
-    return Response("Email account is activated.")
+    return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def userProfileView(request, username):
@@ -90,7 +90,7 @@ def doFollowOrUnfollowView(request, username):
         followerUserProfile.following.remove(userProfileToBeFollowed.user)
         userProfileToBeFollowed.save()
         followerUserProfile.save()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -106,7 +106,7 @@ def updateProfile(request, username):
         serializer = UserProfileSerializer(userProfile, data=request.data, context={'request':request})
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
