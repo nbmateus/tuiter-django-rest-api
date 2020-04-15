@@ -1,4 +1,6 @@
 # TUITER - DJANGO REST API
+http://nbmateus.pythonanywhere.com/
+#
 ## Introduction
 This API was made for learning purposes. The idea was based on the basic functionality of Twitter. Registered users can post content, such as text or an image, in their own profiles. They can also follow other users and comment on their posts, share them or add them to their liked content list.  
 Every GET request that returns a list is paginated and has the same format. For example, a list request of profiles would be: http://localhost:8000/accounts/profile-list/  
