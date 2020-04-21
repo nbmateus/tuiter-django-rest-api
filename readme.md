@@ -1,5 +1,5 @@
 # TUITER - DJANGO REST API
-http://nbmateus.pythonanywhere.com/
+**Current domain:** http://nbmateus.pythonanywhere.com/
 #
 ## Introduction
 This API was made for learning purposes. The idea was based on the basic functionality of Twitter. Registered users can post content, such as text or an image, in their own profiles. They can also follow other users and comment on their posts, share them or add them to their liked content list.  
@@ -42,7 +42,8 @@ And the response would have the following format:
 
 #
 **/accounts/login/**
->A user can login providing either username or email.
+>A user can login providing either username or email. The key returned is the token that should be included in the Authorization HTTP Header on each request that requires authentication, and it should be prefixed by "Token". For example:  
+{"Authorization": "Token bfadbe76a5e67f0929822e1633c41e7882edca5d"}.
 * Methods: POST
 * Parameters:
     - username
