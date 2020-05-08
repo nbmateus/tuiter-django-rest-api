@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 from .views import tuiterAPIRootView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('',tuiterAPIRootView),
@@ -8,3 +10,5 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('postings/', include('postings.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

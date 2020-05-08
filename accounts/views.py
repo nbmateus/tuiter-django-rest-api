@@ -132,3 +132,16 @@ class UserProfileListView(ListAPIView):
     filter_backends = [SearchFilter,]
     search_fields = ['user__username','fullname']
 
+
+@api_view(['GET',])
+@permission_classes([IsAuthenticated])
+def amIFollowingUser(request, username):
+    if request.method == 'GET':
+        try:
+            userProfile = UserProfile.objects.get(user__username=username)
+        except UserProfile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"amIFollowingUser":request.user in userProfile.followers.all()})
+        
+    return Response(status=status.HTTP_400_BAD_REQUEST)

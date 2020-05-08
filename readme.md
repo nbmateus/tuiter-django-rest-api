@@ -268,3 +268,23 @@ And the response would have the following format:
 >Liked content (main posts or comments) of a specific user.
 * Methods: GET
 * Successful response: list of posts liked by a specific user.
+#
+**/postings/did-i-like-post/**```:postId:```**/**
+>Returns a boolean field that indicates if a specific post was was liked by the authenticated user or not.
+* Methods: GET
+* Successful response:
+```json
+{
+    "didILikePost": true
+}
+```
+#
+**/accounts/am-i-following-user/**```:username:```**/**
+>Returns a boolean field that indicates if a specific user is being followed by the authenticated user or not.
+* Methods: GET
+* Successful response:
+```json
+{
+    "amIFollowingUser": true
+}
+```

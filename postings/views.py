@@ -195,3 +195,17 @@ def usersThatSharedView(request, postId):
         return paginator.get_paginated_response(serializer.data)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET',])
+@permission_classes([IsAuthenticated])
+def didILikePost(request, postId):
+    if request.method == 'GET':
+        try:
+            post = Post.objects.get(pk=postId)
+        except Post.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+  
+        return Response({"didILikePost":request.user in post.likes.all()})
+        
+    return Response(status=status.HTTP_400_BAD_REQUEST)

@@ -2,7 +2,7 @@ from django.urls import path
 from .views import  (
     mainPostListView, likedPostsListView, doLikeOrUnlike,
     commentsListView, createPost, postDetail, indexMainPostListView,
-    usersThatLikedView, usersThatSharedView
+    usersThatLikedView, usersThatSharedView, didILikePost
 
 )
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('index-main-post-list/', indexMainPostListView, name='main_post_list'),
     path('main-post-list/<str:username>/', mainPostListView, name='main_post_list'),
     path('liked-post-list/<str:username>/', likedPostsListView, name='liked_post_list'),
+    path('did-i-like-post/<int:postId>/', didILikePost, name='did_i_like_post'),
     
 
     
