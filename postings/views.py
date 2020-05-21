@@ -51,7 +51,7 @@ def likedPostsListView(request, username):
 
 @api_view(['POST','DELETE'])
 @csrf_exempt
-@permission_classes([IsAuthenticated, IsAbleToSeeThePost])
+@permission_classes([IsAuthenticated])
 def doLikeOrUnlike(request, postId):
     try:
         post = Post.objects.get(pk=postId)
